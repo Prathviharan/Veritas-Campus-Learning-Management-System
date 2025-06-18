@@ -1,0 +1,41 @@
+/* src/pages/admin/AdminSupportDashboard.css */
+.admin-support-card {
+  transition: transform 0.3s, box-shadow 0.3s;
+  border: none;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.admin-support-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
+}
+
+.admin-reply {
+  background-color: #f8f9fa;
+  border-left: 4px solid #8BC34A;
+}
+
+.status-badge {
+  font-size: 0.8rem;
+  padding: 5px 10px;
+  border-radius: 20px;
+}
+
+.issue-text {
+  max-height: 100px;
+  overflow-y: auto;
+}
+
+.filter-buttons {
+  margin-bottom: 20px;
+}
+
+.submit-button {
+  transition: background-color 0.3s, border-color 0.3s;
+}
+
+.submit-button:hover:not(:disabled) {
+  background-color: #3E9355 !important;
+  border-color: #3E9355 !important;
+}

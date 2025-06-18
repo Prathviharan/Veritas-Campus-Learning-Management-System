@@ -1,6 +1,5 @@
 import React from "react";
 import home from "../../assets/WelcomePage.png";
-import campusImage from "../../assets/WelcomePage.png";
 
 const Home = () => {
   return (
@@ -8,6 +7,7 @@ const Home = () => {
       <div className="container-fluid p-0">
         <img src={home} class="img-fluid w-100" alt="Home Page"></img>
       </div>
+
       <div className="container text-center mt-5">
         <h2
           className="fw-bold fs-2 fs-md-3 fs-sm-4 "
@@ -41,7 +41,7 @@ const Home = () => {
           {/*left side image */}
           <div className="col-md-6 d-none d-md-block">
             <img
-              src={campusImage}
+              //src={campusImage}
               alt="Campus Summary"
               className="img-fluid rounded shadow"
               style={{ maxHeight: "500px", objectFit: "cover", width: "100%" }}

@@ -57,11 +57,8 @@ const Navbar = () => {
             </li>
 
             <li className="nav-item me-3">
-              <Link
-                to=""
-                className="nav-link text-decoration-underline"
-              >
-                MY PROFILE
+              <Link to="" className="nav-link text-decoration-underline">
+                GET STARTED
               </Link>
             </li>
           </ul>
