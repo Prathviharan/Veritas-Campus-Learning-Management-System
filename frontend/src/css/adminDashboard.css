@@ -1,6 +1,36 @@
+
+
 .admin-dashboard {
   display: flex;
-  font-family: Arial, sans-serif;
+  
+}
+
+.sidebar {
+  width: 250px;
+  background-color: #45b249;
+  color: black;
+  padding: 20px;
+  height: 100%;
+}
+.logo{
+  color: white;
+  margin:10px;
+}
+.nav-list {
+  list-style: none;
+  padding: 0;
+}
+
+.nav-list li {
+  margin: 10px 10px;
+  padding-bottom: 10px;
+  cursor: pointer;
+}
+
+.nav-list li ul {
+  margin-top: 5px;
+  padding-left: 20px;
+  font-size: 0.9em;
 }
 
 .dashboard-main {
@@ -17,6 +47,7 @@
   margin-bottom: 30px;
 }
 
+/* Quick Overview Grid: 3 columns, 2 rows */
 .quick-overview {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -33,6 +64,7 @@
   max-width: 200px;
 }
 
+/* Admin box */
 .admin-profile {
   display: flex;
   flex-direction: column;
@@ -43,7 +75,7 @@
   width: 60px;
   height: 60px;
   border-radius: 50%;
-  margin: 0;
+  margin:0;
 }
 
 .admin-label {
@@ -51,73 +83,71 @@
   font-weight: bold;
 }
 
-.popular-section {
+.popular-section{
   height: auto;
-  width: fit-content;
-  background-color: #34da3a;
+  width:fit-content;
+  background-color:#34da3a;
 }
 
-.popular-section div {
+.popular-section div{
   height: 50px;
-  width: auto;
+  width:auto;
   align-items: center;
   text-align: center;
   padding: 25px;
-  background-color: #34da3a;
+  
+  background-color:#34da3a
 }
 
-.popular-section ul li {
+
+.popular-section ul li{
   list-style: none;
   color: black;
   width: fit-content;
   height: fit-content;
-  background-color: white;
+  
   letter-spacing: 10px;
   padding: 20px;
   font-weight: 700;
 }
 
-.popular-section p {
+
+.popular-section p{
   margin: 0;
   padding: 0;
 }
-
-.popular-section h3,
-.course-progress h3 {
+.popular-section h3, .course-progress h3{
   width: 100%;
   height: 15%;
   background-color: #06a060;
   padding: 10px;
 }
-
-.course-progress {
+.course-progress{
   height: auto;
-  width: auto;
-  background-color: #34da3a;
+  width:auto;
+
+  
+  background-color:#34da3a
 }
+
 
 .popular-section li > .popular-section p {
   flex: 1 1 48%;
   box-sizing: border-box;
 }
-
-.popular-section,
-.recent-activities,
-.course-progress {
+/* The rest remains unchanged */
+.popular-section, .recent-activities, .course-progress {
+  
   margin-top: 20px;
   padding: 20px;
   border-radius: 10px;
 }
 
-.popular-section ul,
-.recent-activities ul {
+.popular-section ul, .recent-activities ul {
+  
   padding-left: 20px;
 }
 
-.course-progress img {
-  height: 75%;
-  width: 75%;
-}
 
 .popular-progress-row {
   display: flex;
@@ -129,14 +159,61 @@
 .popular-progress-row > .course-progress {
   flex: 1 1 48%;
   box-sizing: border-box;
+  
+}
+.course-progress {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: #34da3a;
+  padding: 20px;
+  border-radius: 10px;
+  height: auto;
+  width: auto;
 }
 
-.recent-activities {
+/* Center the pie chart SVG */
+.course-progress svg {
+  display: block;
+  margin: 0 auto;
+}
+
+/* Style for legend */
+.recharts-legend-wrapper {
+  margin-top: 10px;
+  font-weight: bold;
+  color: black;
+}
+
+/* Tooltip styling */
+.recharts-tooltip-wrapper {
+  font-size: 0.9rem;
+  background: #fff;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  padding: 6px 12px;
+  color: #333;
+}
+
+/* Optional: style labels on slices */
+.recharts-pie-label {
+  font-size: 14px;
+  font-weight: 600;
+  fill: #000;
+}
+
+.recent-activities{
   width: auto;
   height: auto;
   background-color: #aee3a8;
 }
 
-.recent-activities h3 {
-  color: white;
+.recent-activities h3{
+  color:white;
+}
+strong{
+  background-color: white;
+  padding: 10px;
+  
 }

@@ -1,7 +1,28 @@
-.courses-page {
-  padding: 20px;
-  font-family: Arial, sans-serif;
+/* Add to courses.css or a shared CSS file */
+
+.courses-layout {
+  display: flex;
+  height: 100vh; /* Full height */
 }
+
+.sidebar {
+  width: 250px;
+  background-color: #45b249;
+  color: black;
+  padding: 20px;
+  height: 100vh;
+  flex-shrink: 0; /* Prevent it from shrinking */
+  box-sizing: border-box;
+  position: sticky;
+  top: 0;
+}
+
+.courses-page {
+  flex: 1; /* Take up remaining space */
+  padding: 20px;
+  overflow-y: auto;
+}
+
 
 .courses-title {
   font-size: 28px;

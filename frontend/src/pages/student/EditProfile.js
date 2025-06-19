@@ -1,30 +1,42 @@
 import React, { useEffect, useState } from "react";
 import profileimage from "../../assets/profileimage.png";
 import axios from "axios";
+import { getCurrentUser } from "../../api/user";
+import { useNavigate } from "react-router-dom";
 
 const EditProfile = () => {
-  const studentId = "68187117c8e50295c68bba3e";
-  const [email, setEmail] = useState("");
-  const [imageFile, setImageFile] = useState(null); // for actual file
-  const [previewImage, setPreviewImage] = useState(""); // for preview
+  const [imageFile, setImageFile] = useState(null);
+  const [previewImage, setPreviewImage] = useState("");
+
+  const [studentData, setStudentData] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchStudent = async () => {
       try {
-        const res = await axios.get(
-          `http://localhost:5000/api/student/${studentId}`
+        const userData = await getCurrentUser();
+
+        if (!userData) {
+          throw new Error("User data is missing");
+        }
+
+        const studentRes = await axios.get(
+          `http://localhost:5000/api/student/profile/${userData._id}`
         );
-        const student = res.data.student;
-        setEmail(student.email || "");
+
+        const student = studentRes.data.studentProfile;
+        setStudentData(student); // store student data in state
+
         setPreviewImage(
           student.image ? `http://localhost:5000/${student.image}` : ""
-        ); // adjust based on backend
+        );
       } catch (error) {
         console.error("Failed to fetch student", error);
       }
     };
+
     fetchStudent();
-  }, [studentId]);
+  }, []);
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -36,14 +48,14 @@ const EditProfile = () => {
     e.preventDefault();
 
     const formData = new FormData();
-    formData.append("email", email);
+
     if (imageFile) {
       formData.append("image", imageFile);
     }
 
     try {
       await axios.put(
-        `http://localhost:5000/api/editStudent/${studentId}`,
+        `http://localhost:5000/api/editStudent/${studentData._id}`,
         formData,
         {
           headers: {
@@ -53,6 +65,7 @@ const EditProfile = () => {
       );
 
       alert("Profile updated!");
+      navigate("/studentProfile");
     } catch (error) {
       console.error("Update failed", error);
       alert("Update failed");

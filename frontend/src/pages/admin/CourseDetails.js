@@ -1,67 +1,87 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import '../../css/course.css';
+import axios from 'axios';
+import '../../css/course.css'; // Make sure this path matches your structure
 
 const CourseDetailsPage = () => {
-  const { courseName } = useParams();
+  const { id } = useParams();
+  const [courseData, setCourseData] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const courseData = {
-    "English": {
-      title: 'Diploma in English',
-      modules: ['Module 1', 'Module 2', 'Module 3', 'Module 4', 'Module 5'],
-      assignments: ['Assignment 1', 'Assignment 2', 'Assignment 3', 'Assignment 4', 'Assignment 5'],
-      exams: ['Exam 1', 'Exam 2', 'Exam 3', 'Exam 4', 'Exam 5'],
-      quizzes: ['Quiz 1', 'Quiz 2', 'Quiz 3', 'Quiz 4', 'Quiz 5'],
-    },
-    "Business Administration": {
-      title: 'Diploma in Business Administration',
-      modules: ['BA Module 1', 'BA Module 2', 'BA Module 3', 'BA Module 4', 'BA Module 5'],
-      assignments: ['BA Assignment 1', 'BA Assignment 2', 'BA Assignment 3', 'BA Assignment 4', 'BA Assignment 5'],
-      exams: ['BA Exam 1', 'BA Exam 2', 'BA Exam 3', 'BA Exam 4', 'BA Exam 5'],
-      quizzes: ['BA Quiz 1', 'BA Quiz 2', 'BA Quiz 3', 'BA Quiz 4', 'BA Quiz 5'],
-    },
-    "Human Resource Management": {
-      title: 'Diploma in Human Resource Management',
-      modules: ['HR Module 1', 'HR Module 2', 'HR Module 3', 'HR Module 4', 'HR Module 5'],
-      assignments: ['HR Assignment 1', 'HR Assignment 2', 'HR Assignment 3', 'HR Assignment 4', 'HR Assignment 5'],
-      exams: ['HR Exam 1', 'HR Exam 2', 'HR Exam 3', 'HR Exam 4', 'HR Exam 5'],
-      quizzes: ['HR Quiz 1', 'HR Quiz 2', 'HR Quiz 3', 'HR Quiz 4', 'HR Quiz 5'],
-    },
-    "Internal Sales & Marketing": {
-      title: 'Diploma in Internal Sales & Marketing',
-      modules: ['Sales Module 1', 'Sales Module 2', 'Sales Module 3', 'Sales Module 4', 'Sales Module 5'],
-      assignments: ['Sales Assignment 1', 'Sales Assignment 2', 'Sales Assignment 3', 'Sales Assignment 4', 'Sales Assignment 5'],
-      exams: ['Sales Exam 1', 'Sales Exam 2', 'Sales Exam 3', 'Sales Exam 4', 'Sales Exam 5'],
-      quizzes: ['Sales Quiz 1', 'Sales Quiz 2', 'Sales Quiz 3', 'Sales Quiz 4', 'Sales Quiz 5'],
-    },
-  };
+  useEffect(() => {
+    const fetchCourseDetails = async () => {
+      try {
+        const response = await axios.get(`http://localhost:5000/api/adminCourseStates/details/${id}`);
+        setCourseData(response.data);
+      } catch (error) {
+        console.error('Error fetching course details:', error);
+        alert('Failed to load course details.');
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const decodedCourse = decodeURIComponent(courseName);
-  const data = courseData[decodedCourse];
+    fetchCourseDetails();
+  }, [id]);
 
-  if (!data) return <p>No details available for "{decodedCourse}".</p>;
+  if (loading) return <p>Loading...</p>;
+  if (!courseData) return <p>No data found.</p>;
+
+  const { course, materials, assignments, quizzes, exams } = courseData;
 
   return (
-    <div className="course-details">
-      <h3>{data.title}</h3>
-      <div className="details-columns">
-        <div>
-          <h4>Lecture Materials:</h4>
-          <ul>{data.modules.map((mod, i) => <li key={i}>{mod}</li>)}</ul>
+    <div className="course-details-container">
+      <h2>{course.title}</h2>
+
+      <div className="course-details-layout">
+        {/* Row 1: Lecture Materials & Exams */}
+        <div className="coursed-row">
+          <div className="coursed-column">
+            <h5>Lecture Materials</h5>
+            {materials.length ? (
+              <ul>
+                {materials.map((m) => (
+                  <li key={m._id}>{m.title}</li>
+                ))}
+              </ul>
+            ) : <p>No materials available.</p>}
+          </div>
+
+          <div className="coursed-column">
+            <h5>Exams</h5>
+            {exams.length ? (
+              <ul>
+                {exams.map((e) => (
+                  <li key={e._id}>{e.title}</li>
+                ))}
+              </ul>
+            ) : <p>No exams available.</p>}
+          </div>
         </div>
-        <div>
-          <h4>Exams:</h4>
-          <ul>{data.exams.map((e, i) => <li key={i}>{e}</li>)}</ul>
-        </div>
-      </div>
-      <div className="details-columns">
-        <div>
-          <h4>Assignments:</h4>
-          <ul>{data.assignments.map((a, i) => <li key={i}>{a}</li>)}</ul>
-        </div>
-        <div>
-          <h4>Quizzes:</h4>
-          <ul>{data.quizzes.map((q, i) => <li key={i}>{q}</li>)}</ul>
+
+        {/* Row 2: Assignments & Quizzes */}
+        <div className="coursed-row">
+          <div className="coursed-column">
+            <h5>Assignments</h5>
+            {assignments.length ? (
+              <ul>
+                {assignments.map((a) => (
+                  <li key={a._id}>{a.title}</li>
+                ))}
+              </ul>
+            ) : <p>No assignments available.</p>}
+          </div>
+
+          <div className="coursed-column">
+            <h5>Quizzes</h5>
+            {quizzes.length ? (
+              <ul>
+                {quizzes.map((q) => (
+                  <li key={q._id}>{q.title}</li>
+                ))}
+              </ul>
+            ) : <p>No quizzes available.</p>}
+          </div>
         </div>
       </div>
     </div>

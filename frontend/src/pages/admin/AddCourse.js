@@ -1,29 +1,64 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import '../../css/AddCourse.css';
 
-const AddCourse = ({ courses, setCourses }) => {
+const AddCourse = () => {
   const navigate = useNavigate();
+
   const [newCourse, setNewCourse] = useState({
     title: '',
+    instructor: [''],
     description: '',
-    instructor: ''
   });
 
-  const handleInputChange = (e) => {
+  const handleChange = (e) => {
     const { name, value } = e.target;
-    setNewCourse((prev) => ({ ...prev, [name]: value }));
+    setNewCourse(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSave = () => {
-    if (!newCourse.title.trim() || !newCourse.description.trim() || !newCourse.instructor.trim()) {
-      alert('All fields are required.');
+  const handleInstructorChange = (index, value) => {
+    const updated = [...newCourse.instructor];
+    updated[index] = value;
+    setNewCourse(prev => ({ ...prev, instructor: updated }));
+  };
+
+  const handleAddInstructor = () => {
+    setNewCourse(prev => ({ ...prev, instructor: [...prev.instructor, ''] }));
+  };
+
+  const handleRemoveInstructor = (index) => {
+    const updated = newCourse.instructor.filter((_, i) => i !== index);
+    setNewCourse(prev => ({ ...prev, instructor: updated.length ? updated : [''] }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!newCourse.title.trim() || !newCourse.description.trim()) {
+      alert('Please fill in all fields.');
       return;
     }
 
-    setCourses([...courses, { ...newCourse }]);
-    alert('New course added successfully!');
-    navigate('/admin/courses');
+    if (newCourse.instructor.some(inst => !inst.trim())) {
+      alert('Please complete all instructor fields or remove empty ones.');
+      return;
+    }
+
+    const sanitized = {
+      title: newCourse.title.trim(),
+      description: newCourse.description.trim(),
+      instructor: newCourse.instructor.map(name => name.trim()),
+    };
+
+    try {
+      await axios.post('http://localhost:5000/api/adminCourseStates/stats', sanitized);
+      alert('Course added successfully!');
+      navigate('/admin/courses');
+    } catch (error) {
+      console.error('Error adding course:', error);
+      alert('Failed to add course.');
+    }
   };
 
   const handleCancel = () => {
@@ -33,41 +68,51 @@ const AddCourse = ({ courses, setCourses }) => {
   return (
     <div className="add-course-page">
       <h2>Add New Course</h2>
-      <form>
+      <form onSubmit={handleSubmit}>
         <label>
           Title:
           <input
             type="text"
             name="title"
             value={newCourse.title}
-            onChange={handleInputChange}
+            onChange={handleChange}
+            required
           />
         </label>
+
         <label>
-          Instructor:
-          <input
-            type="text"
-            name="instructor"
-            value={newCourse.instructor}
-            onChange={handleInputChange}
-          />
+          Instructors:
+          {newCourse.instructor.map((inst, index) => (
+            <div key={index} style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '5px' }}>
+              <input
+                type="text"
+                value={inst}
+                onChange={(e) => handleInstructorChange(index, e.target.value)}
+                placeholder={`Instructor ${index + 1}`}
+                required
+              />
+              {newCourse.instructor.length > 1 && (
+                <button type="button" onClick={() => handleRemoveInstructor(index)} className='btn-cancel'>Remove</button>
+              )}
+            </div>
+          ))}
+          <button type="button" onClick={handleAddInstructor} className="btn-cancel">Add Instructor</button>
         </label>
+
         <label>
           Description:
           <textarea
             name="description"
             rows="4"
             value={newCourse.description}
-            onChange={handleInputChange}
-          ></textarea>
+            onChange={handleChange}
+            required
+          />
         </label>
+
         <div className="form-buttons">
-          <button type="button" className="btn-save" onClick={handleSave}>
-            Save
-          </button>
-          <button type="button" className="btn-cancel" onClick={handleCancel}>
-            Cancel
-          </button>
+          <button type="submit" className="btn-save">Add Course</button>
+          <button type="button" className="btn-cancel" onClick={handleCancel}>Cancel</button>
         </div>
       </form>
     </div>

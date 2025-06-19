@@ -1,8 +1,10 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import '../../css/News.css';
 //import newsFleet from '../../assets/news-fleet.png';
 import convocationImage from '../../assets/convocation-image.png';
 import sportImage from '../../assets/sport-image.png';
+import { Button } from "bootstrap/dist/js/bootstrap.bundle.min";
 
 const newsData = [
   {
@@ -38,8 +40,27 @@ const newsData = [
 ];
 
 const News = () => {
+  const navigate = useNavigate();
+
+  const handleSupportDeskClick = () => {
+    navigate('/supportdesk');
+  };
+
   return (
     <div className="news-page">
+      <div className="support-service">
+        <h1>Support Service</h1>
+        <h6>We’re here to provide assistance with any academic, technical, or personal challenges you may encounter during your university journey. Whether you’re experiencing difficulties with your coursework, require IT support, or need guidance from student services, our team is ready to help. Simply submit your request, and we’ll respond promptly to support you every step of the way.
+
+</h6>
+      <button 
+        className="btn submit-btn" 
+        onClick={handleSupportDeskClick}
+      >
+        Support Desk
+      </button>
+      </div>
+      <br></br>
       <div className="news-header">
         <h1>NEWS & EVENTS OF VERITAS</h1>
         <p><center>
