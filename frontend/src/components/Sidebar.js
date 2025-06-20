@@ -52,6 +52,29 @@ const Sidebar = () => {
           </ul>
         </li>
 
+
+        <li>
+          <NavLink
+            to="/admin/announcements"
+            className={({ isActive }) => (isActive ? 'active-link' : 'inactive-link')}
+          >
+          <FaBullhorn /> Announcement
+          </NavLink>
+        </li>
+        
+        
+        <li><FaCertificate /> Exams & certification</li>
+        <li><FaLifeRing /> Support</li>
+        <li>
+          <NavLink
+            to="/admin/settings"
+            className={({ isActive }) => (isActive ? 'active-link' : 'inactive-link')}
+          >
+          <FaCog /> Settings
+          </NavLink>
+        </li>
+
+
         <li><FaBullhorn /> Announcement</li>
         <li><FaCertificate /> Exams & certification</li>
 
@@ -66,9 +89,11 @@ const Sidebar = () => {
         </li>
 
         <li><FaCog /> Settings</li>
+
       </ul>
     </div>
   );
 };
 
 export default Sidebar;
+

@@ -1,5 +1,6 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
+import './index.css';
 
 // Components
 import Navbar from "./components/Navbar";
@@ -29,6 +30,15 @@ import CourseDetails from "./pages/admin/CourseDetails";
 import EditCourse from "./pages/admin/EditCourse";
 import AddCourse from "./pages/admin/AddCourse";
 import AdminSupportDashboard from "./pages/admin/AdminSupportDashboard";
+import CreateAnnouncement from "./pages/admin/CreateAnnouncement";
+import SendNotification from "./pages/admin/SendNotification";
+import Settings from "./pages/admin/Settings";
+import ViewAnnouncements from "./pages/admin/ViewAnnouncements";
+import Layout from "./pages/admin/Layout";
+import Layout_Announcement from "./pages/admin/Layout_Announcement";
+import EditAnnouncement from "./components/EditeAnnouncemet";
+import EditNotification from "./components/EditNotification"
+
 
 // Student Pages
 import SupportForm from "./pages/student/SupportForm";
@@ -111,6 +121,27 @@ function App() {
           element={<EditAssignment />}
         />
 
+
+        <Route path="/admin/admin-dashboard" element={<AdminDashboard />} />
+        <Route path="/admin" element={<Layout_Announcement />}>
+        <Route path="create-announcement" element={<CreateAnnouncement />} />
+        <Route path="send-notification" element={<SendNotification />} />
+        <Route path="settings" element={<Settings />} />
+        <Route path="announcements" element={<ViewAnnouncements />} />
+        </Route>
+        <Route path="" element={<Layout_Announcement />}>
+        <Route path="/edit-announcement/:id" element={<EditAnnouncement />} />
+        <Route path="/edit-notification/:id" element={<EditNotification />} />
+        </Route>
+
+        
+
+        <Route path="/support-request" element={<SupportForm />} />
+        <Route path="/support-list" element={<SupportList />} />
+        <Route path="/admin/support" element={<AdminSupportDashboard />} />
+        <Route path="/supportdesk" element={<SupportDesk />} />
+        <Route path="/successfully-request" element={<SuccessfullyRequest />} />
+
         {/* Instructor - Announcement */}
         <Route path="/addannouncement" element={<AddAnnouncement />} />
         <Route path="/addedannouncement" element={<AddedAnnouncement />} />
@@ -118,6 +149,7 @@ function App() {
           path="/updateannouncement/:id"
           element={<UpdateAnnouncement />}
         />
+
       </Routes>
 
       <Footer />
