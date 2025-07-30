@@ -6,7 +6,7 @@ const Home = () => {
   return (
     <div>
       <div className="container-fluid p-0">
-        <img src={home} class="img-fluid w-100" alt="Home Page"></img>
+        <img src={home} className="img-fluid w-100" alt="Home Page"></img>
       </div>
       <div className="container text-center mt-5">
         <h2

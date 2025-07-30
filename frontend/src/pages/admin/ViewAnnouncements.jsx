@@ -4,7 +4,7 @@ import {
   useGetAnnouncements,
   useDeleteAnnouncement,
 } from "../../Services/announcementService";
-import Layout_Announcement from "./Layout_Announcement";
+
 
 export default function ViewAnnouncements() {
   const { data, error, loading, refetch } = useGetAnnouncements();
