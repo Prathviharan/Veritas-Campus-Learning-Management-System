@@ -18,6 +18,7 @@ const quizRoutes = require("./routes/quizRoutes");
 
 const quizAnswersRoute = require("./routes/Student/quizAnswersRoute");
 const studentRoutes = require("./routes/student");
+const AdminStudentRoutes = require("./routes/AdminStudentRoutes");
 const instructorRoutes = require("./routes/instructorRoutes");
 
 //const instructorRoutesV2 = require("./routes/InsructorsRoute")
@@ -78,6 +79,7 @@ app.use("/api/adminsupport", adminSupportRoutes);
 app.use("/api/adminReport", adminReportRoutes);
 app.use("/api/adminCourseStats", courseStatsRoutes);
 app.use("/api/adminDashboard", adminDashboardRoutes);
+app.use("/api/students",AdminStudentRoutes);
 
 // Database Connection
 dotenv.config();

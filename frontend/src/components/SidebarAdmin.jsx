@@ -125,7 +125,7 @@ const SidebarAdmin = () => {
             <div className="sidebar-item">
               
               <NavLink
-                to="/admin/view-students"
+                to="/admin/view-student"
                 className={({ isActive }) => (isActive ? 'active-link' : 'inactive-link')}
               ><FontAwesomeIcon icon={faUserGraduate} className="icon" />
                 <span>View all Students</span>
