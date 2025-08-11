@@ -153,7 +153,7 @@ function EditStudent() {
 
         <button
           type="submit"
-          className="bg-lime-500 hover:bg-lime-600 text-white font-semibold py-2 px-4 rounded"
+          className="bg-lime-500 hover:bg-lime-600 text-white font-semibold py-2 px-4 rounded items-center"
         >
           Update Student
         </button>
