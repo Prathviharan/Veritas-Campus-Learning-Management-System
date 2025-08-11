@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom"; // Import useNavigate
+import { useNavigate } from "react-router-dom";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
-import { useGetNotifications } from "../../Services/notificationService"; // Import API hook
-import bbImage from "../../assets/bb.png"; // bb image for sidebar
+import { useGetNotifications } from "../../Services/notificationService";
+import bbImage from "../../assets/bb.png";
 import "./Dashboard.css";
 
 const dashboardData = {
@@ -42,26 +42,105 @@ const dashboardData = {
       progress: 50,
     },
   ],
-  privateFiles: [
-    { name: "1 (1).c", date: "2023-10-15", size: "24KB" },
-    { name: "1.c", date: "2023-10-10", size: "18KB" },
-    { name: "2.c", date: "2023-09-28", size: "32KB" },
-  ],
 };
 
 const Dashboard = () => {
-  const navigate = useNavigate(); // Initialize navigate
+  const navigate = useNavigate();
 
-  const { data: notificationsData, loading, error } = useGetNotifications(); // Fetch notifications
+  const { data: notificationsData, loading, error } = useGetNotifications();
 
   const [date, setDate] = useState(new Date());
-  const [events, setEvents] = useState([]); // Store events in state
+  const [events, setEvents] = useState([]);
   const [event, setEvent] = useState("");
-  const [selectedFile, setSelectedFile] = useState(null); // File state
-  const [courses, setCourses] = useState([]); // State to store enrolled courses
+  const [courses, setCourses] = useState([]);
   const studentId = localStorage.getItem("studentId");
 
-  // Fetch enrolled courses
+  const [privateFiles, setPrivateFiles] = useState([]);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const fileInputRef = useRef();
+
+  useEffect(() => {
+    const fetchFiles = async () => {
+      try {
+        const { data } = await axios.get('http://localhost:5000/api/files');
+        setPrivateFiles(data.files || data);
+      } catch (err) {
+        console.error('Failed to load files:', err);
+      }
+    };
+    fetchFiles();
+  }, []);
+
+  const handleFileChange = (e) => {
+    if (e.target.files && e.target.files[0]) {
+      setSelectedFile(e.target.files[0]);
+    }
+  };
+
+  const handleFileUpload = async () => {
+    if (!selectedFile) {
+      alert("Please select a file.");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("file", selectedFile);
+
+    try {
+      setUploadProgress(0);
+      const { data } = await axios.post(
+        "http://localhost:5000/api/files/upload",
+        formData,
+        {
+          headers: { "Content-Type": "multipart/form-data" },
+          onUploadProgress: (progress) => {
+            const percent = Math.round((progress.loaded * 100) / progress.total);
+            setUploadProgress(percent);
+          },
+        }
+      );
+
+      if (data.success && data.file) {
+        setPrivateFiles((prevFiles) => [data.file, ...prevFiles]);
+        setSelectedFile(null);
+        if (fileInputRef.current) fileInputRef.current.value = '';
+        alert("File uploaded successfully!");
+      } else {
+        alert(data.error || "Upload failed");
+      }
+    } catch (error) {
+      console.error("Error uploading file", error);
+      alert("Error uploading file");
+    } finally {
+      setUploadProgress(0);
+    }
+  };
+
+  const handleFileDownload = (filename) => {
+    window.open(`http://localhost:5000/uploads/${filename}`, "_blank");
+  };
+
+  const handleDeleteFile = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this file?')) return;
+    try {
+      await axios.delete(`http://localhost:5000/api/files/${id}`);
+      setPrivateFiles((prevFiles) => prevFiles.filter((file) => file._id !== id));
+      alert('File deleted successfully.');
+    } catch (err) {
+      console.error('Delete error:', err);
+      alert('Failed to delete file.');
+    }
+  };
+
+  const handlePrivateFilesClick = () => {
+    navigate("/student/private-files");
+  };
+
+  const handleNotificationsClick = () => {
+    navigate("/student/notifications");
+  };
+
   useEffect(() => {
     const fetchCourses = async () => {
       try {
@@ -78,7 +157,6 @@ const Dashboard = () => {
     }
   }, [studentId]);
 
-  // Event-related functions
   useEffect(() => {
     const storedEvents = JSON.parse(localStorage.getItem("events")) || [];
     setEvents(storedEvents);
@@ -111,61 +189,18 @@ const Dashboard = () => {
     ));
   };
 
-  // Handle file upload
-  const handleFileChange = (e) => {
-    setSelectedFile(e.target.files[0]);
-  };
-
-  const handleFileUpload = async () => {
-    if (!selectedFile) {
-      alert("Please select a file.");
-      return;
-    }
-
-    const formData = new FormData();
-    formData.append("file", selectedFile);
-
-    try {
-      const response = await axios.post(
-        "http://localhost:5000/student/upload-file", // Adjust URL as per your backend
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
-
-      alert("File uploaded successfully");
-      console.log(response.data); // Log the file info returned by the backend
-      setSelectedFile(null); // Clear the selected file
-    } catch (error) {
-      console.error("Error uploading file", error);
-      alert("Error uploading file");
-    }
-  };
-
-  // Handle file download
-  const handleFileDownload = (fileUrl) => {
-    window.open(`http://localhost:5000${fileUrl}`, "_blank");
-  };
-
-  // Handle navigation to Enrolled Courses page
   const handleEnrolledCourses = () => {
-    navigate("/student/enrolledcourses"); // Navigate to the Enrolled Courses page
+    navigate("/student/enrolledcourses");
   };
 
-  // Handle navigation to Programme page when clicking on Recently Accessed Program
   const handleRecentlyAccessedProgram = () => {
-    navigate("/student/programme"); // Navigate to the Programme page
+    navigate("/student/programme");
   };
 
   return (
     <div className="dashboard">
       <div className="main-content">
-        {/* Left Content Section */}
         <div className="left-content">
-          {/* Recently Accessed Programs */}
           <div className="rectangle-2142">
             <div className="rectangle-content">
               <h2 className="section-title">Recently accessed programs</h2>
@@ -174,7 +209,7 @@ const Dashboard = () => {
                   <div
                     className="program-card"
                     key={`program-${program.id}`}
-                    onClick={handleRecentlyAccessedProgram} // Navigate to programme page
+                    onClick={handleRecentlyAccessedProgram}
                   >
                     <h3 className="program-name">{program.title}</h3>
                     <p className="program-desc">{program.description}</p>
@@ -196,7 +231,6 @@ const Dashboard = () => {
             </div>
           </div>
 
-          {/* Enrolled Courses Section */}
           <div className="rectangle-2143">
             <div className="rectangle-content">
               <h2 className="section-title">Enrolled Courses</h2>
@@ -206,7 +240,7 @@ const Dashboard = () => {
                     <div
                       key={index}
                       className="course-card"
-                      onClick={handleEnrolledCourses} // Navigate to Enrolled Courses page
+                      onClick={handleEnrolledCourses}
                     >
                       <h3 className="course-title">{course.title}</h3>
                       <p className="course-instructor">Instructor: {course.instructor}</p>
@@ -220,49 +254,91 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Right Sidebar */}
         <div className="sidebar">
-          {/* Notifications Section */}
           <div className="sidebar-section1">
             <h3>Timeline</h3>
+            <p>Timeline events go here...</p>
+          </div>
+
+          <div className="sidebar-section1">
+            <h3 onClick={handleNotificationsClick} style={{ cursor: 'pointer' }}>
+              Notifications
+            </h3>
             {loading && <p>Loading notifications...</p>}
             {error && <p>Error loading notifications</p>}
             <ul className="notification-list">
-              {notificationsData?.data?.map((notification) => (
+              {notificationsData?.data?.slice(0, 3).map((notification) => (
                 <li key={notification.id} className="notification-item">
                   {notification.message}
                 </li>
               ))}
             </ul>
+            {notificationsData?.data?.length > 3 && (
+                <div className="view-more-container">
+                    <button onClick={handleNotificationsClick} className="view-more-btn">
+                        View More
+                    </button>
+                </div>
+            )}
           </div>
 
-          {/* Private Files Section */}
           <div className="sidebar-section2">
-            <h3>Private files</h3>
+            <h3 onClick={handlePrivateFilesClick} style={{ cursor: 'pointer' }}>
+              Private files
+            </h3>
             <ul className="file-list">
-              {dashboardData.privateFiles.map((file, index) => (
-                <li key={`file-${index}`}>
-                  <div className="file-info">
-                    <span className="file-name">{file.name}</span>
-                    <span className="file-meta">{file.date} • {file.size}</span>
-                  </div>
-                  <button
-                    className="file-download"
-                    onClick={() => handleFileDownload(file.fileUrl)}
-                  >
-                    Download
-                  </button>
-                </li>
-              ))}
+              {privateFiles.length === 0 ? (
+                <p>No files uploaded yet.</p>
+              ) : (
+                privateFiles.slice(0, 3).map((file) => (
+                  <li key={file._id}>
+                    <div className="file-info">
+                      <span className="file-name">{file.originalname}</span>
+                      <span className="file-meta">
+                        {new Date(file.uploadDate).toLocaleDateString()} • {Math.round(file.size / 1024)} KB
+                      </span>
+                    </div>
+                    <button
+                      className="file-download"
+                      onClick={() => handleFileDownload(file.filename)}
+                    >
+                      Download
+                    </button>
+                    <button
+                      className="file-delete"
+                      onClick={() => handleDeleteFile(file._id)}
+                    >
+                      Delete
+                    </button>
+                  </li>
+                ))
+              )}
             </ul>
-
-            {/* File Upload */}
+            {privateFiles.length > 3 && (
+                <div className="view-more-container">
+                    <button onClick={handlePrivateFilesClick} className="view-more-btn">
+                        View More
+                    </button>
+                </div>
+            )}
+            
             <h4>Upload a File</h4>
-            <input type="file" onChange={handleFileChange} />
-            <button onClick={handleFileUpload}>Upload File</button>
+            <input type="file" onChange={handleFileChange} ref={fileInputRef} />
+            <button onClick={handleFileUpload} disabled={!selectedFile || uploadProgress > 0}>
+              {uploadProgress > 0 ? `Uploading... ${uploadProgress}%` : 'Upload File'}
+            </button>
+            {uploadProgress > 0 && (
+              <div className="progress-container">
+                <div className="progress-bar-small">
+                  <div
+                    className="progress-fill"
+                    style={{ width: `${uploadProgress}%` }}
+                  ></div>
+                </div>
+              </div>
+            )}
           </div>
 
-          {/* Calendar Section */}
           <div className="sidebar-section calendar">
             <h3>Calendar</h3>
             <Calendar onChange={handleDateClick} value={date} className="react-calendar" />

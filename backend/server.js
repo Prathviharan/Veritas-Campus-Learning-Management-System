@@ -19,15 +19,15 @@ const quizRoutes = require("./routes/quizRoutes");
 const quizAnswersRoute = require("./routes/Student/quizAnswersRoute");
 const studentRoutes = require("./routes/student");
 const instructorRoutes = require("./routes/instructorRoutes");
-<<<<<<< HEAD
-//const instructorRoutesV2 = require("./routes/InsructorsRoute")
-// const fileRoutes = require('./routes/Student/fileRoutes'); //
-// const assignmentRoutes = require('./routes/Student/assignmentRoutes'); //
-// const studentNotificationRoutes = require('./routes/Student/notificationRoutes');//
-// const instructorNotificationRoutes = require('./routes/Instructor/notificationRoutes'); //
-=======
+//<<<<<<< HEAD
+ const instructorRoutesV2 = require("./routes/InsructorsRoute")
+ const fileRoutes = require('./routes/Student/fileRoutes'); //
+ const assignmentRoutes = require('./routes/Student/assignmentRoutes'); //
+ const studentNotificationRoutes = require('./routes/Student/notificationRoutes');//
+ const instructorNotificationRoutes = require('./routes/Instructor/notificationRoutes'); //
+// =======
 // const instructorRoutesV2 = require("./routes/InsructorsRoute");
->>>>>>> d6ffe05ffdff6813b229fb9b6ca72d5c3f754ce8
+// >>>>>>> d6ffe05ffdff6813b229fb9b6ca72d5c3f754ce8
 // Load env variables
 dotenv.config();
 

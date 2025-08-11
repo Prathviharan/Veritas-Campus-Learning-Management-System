@@ -186,7 +186,7 @@ function App() {
           <Route path="support-list" element={<SupportList />} />
           <Route path="modules" element={<ModulePage />} />
         </Route>
-        <Route path="/private-files" element={<StudentPrivateFiles />} />
+        <Route path="/student/private-files" element={<StudentPrivateFiles />} />
         <Route path="/assignment" element={<AssignmentSubmission />} />
         <Route path="/student/notifications" element={<StudentNotificationPage />} />
         <Route path="/student/marks" element={<MarksShowing />}/>

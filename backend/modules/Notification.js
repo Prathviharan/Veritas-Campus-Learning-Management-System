@@ -12,5 +12,6 @@ const notificationSchema = new mongoose.Schema({
   updatedAt: { type: Date }
 }, { timestamps: true });
 
-module.exports = mongoose.model('Notification', notificationSchema);
+// module.exports = mongoose.model('Notification', notificationSchema);
+module.exports = mongoose.models.Notification || mongoose.model('Notification', notificationSchema);
 
