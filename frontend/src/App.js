@@ -49,6 +49,9 @@ import EditInsructor from './pages/admin/EditInsructor';
 import QuizExam from './pages/admin/QuizExam';
 import Quizes from './pages/admin/Quizes';
 import Exams from './pages/admin/Exams';
+import AddStudent from "./pages/admin/AddStudent.jsx";
+import ViewStudents from "./pages/admin/ViewStudent.js";
+import EditStudent from "./pages/admin/EditStudent.js";
 
 // Student Pages
 import SupportForm from "./pages/student/SupportForm";
@@ -95,7 +98,8 @@ import PublicLayout from "./layouts/PublicLayout";
 import InstructorLayout from "./layouts/InstructorLayout";
 import AdminLayout from "./layouts/AdminLayout";
 import { StudentModules } from "./pages/student/StudentModules";
-import AddStudent from "./pages/admin/AddStudent.jsx";
+
+
 
 function App() {
   return (
@@ -143,6 +147,9 @@ function App() {
           <Route path="edit-announcement/:id" element={<EditAnnouncement />} />
           <Route path="edit-notification/:id" element={<EditNotification />} />
           <Route path="add-student" element={<AddStudent />} />
+          <Route path="view-student" element={<ViewStudents />} />
+          <Route path="editStudent/:id" element={<EditStudent />} />
+
 
         </Route>
 
