@@ -68,6 +68,7 @@ const Instructor = () => {
     setShowDeleteConfirm(true);
   };
 
+  //delete conformation function
   const confirmDelete = async () => {
     if (!deletingInstructor) return;
 
