@@ -94,6 +94,36 @@
   box-shadow: 0 0 0 3px rgba(74, 108, 247, 0.1);
 }
 
+/* Add Instructor button */
+.add-instructor-button {
+  padding: 12px 20px;
+  background-color: var(--success-color);
+  color: white;
+  border: none;
+  border-radius: var(--border-radius);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.add-instructor-button:hover {
+  background-color: var(--success-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(79, 197, 91, 0.3);
+}
+
+.add-instructor-button:active {
+  transform: translateY(0);
+}
+
+.button-icon {
+  font-size: 12px;
+}
+
 /* Refresh button */
 .refresh-button {
   padding: 12px 20px;
@@ -486,6 +516,7 @@
   
   .search-input,
   .department-filter,
+  .add-instructor-button,
   .refresh-button {
     width: 100%;
   }
@@ -547,5 +578,9 @@
   .cancel-button,
   .delete-confirm-button {
     width: 100%;
+  }
+
+  .add-instructor-button {
+    justify-content: center;
   }
 }

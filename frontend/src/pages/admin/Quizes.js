@@ -1,84 +1,65 @@
-import React, { useState, useMemo } from 'react';
-import { Search, Filter, Download, FileText, FileSpreadsheet } from 'lucide-react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { Search, Filter, Download, FileText, FileSpreadsheet, Loader2 } from 'lucide-react';
 
 const Quizes = () => {
-  // Sample quiz data with date ranges for availability
-  const [quizes] = useState([
-    {
-      id: 1,
-      title: "JavaScript Fundamentals",
-      availability: "May 1, 2025 - May 30, 2025",
-      timeLimit: "30 minutes",
-      totalMarks: 100,
-      allowMultipleAttempts: "Yes",
-      status: "Active"
-    },
-    {
-      id: 2,
-      title: "React Basics",
-      availability: "May 5, 2025 - June 15, 2025",
-      timeLimit: "45 minutes",
-      totalMarks: 150,
-      allowMultipleAttempts: "No",
-      status: "Active"
-    },
-    {
-      id: 3,
-      title: "CSS Advanced Techniques",
-      availability: "June 1, 2025 - June 30, 2025",
-      timeLimit: "60 minutes",
-      totalMarks: 120,
-      allowMultipleAttempts: "Yes",
-      status: "Upcoming"
-    },
-    {
-      id: 4,
-      title: "Node.js for Beginners",
-      availability: "May 10, 2025 - July 10, 2025",
-      timeLimit: "90 minutes",
-      totalMarks: 200,
-      allowMultipleAttempts: "No",
-      status: "Active"
-    },
-    {
-      id: 5,
-      title: "Database Design Principles",
-      availability: "April 1, 2025 - April 30, 2025",
-      timeLimit: "75 minutes",
-      totalMarks: 180,
-      allowMultipleAttempts: "Yes",
-      status: "Expired"
-    }
-  ]);
+  // State for quiz data and loading
+  const [quizes, setQuizes] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   // Filter and search states
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
   const [attemptsFilter, setAttemptsFilter] = useState('All');
 
+  // Fetch quizzes from backend
+  useEffect(() => {
+    const fetchQuizzes = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        const response = await fetch('http://localhost:5000/api/quizzes');
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        setQuizes(data);
+      } catch (err) {
+        console.error('Error fetching quizzes:', err);
+        setError(`Failed to load quizzes: ${err.message}`);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchQuizzes();
+  }, []);
+
   // Get unique values for filter options
- 
   const statuses = ['All', ...new Set(quizes.map(quiz => quiz.status))];
   const attemptOptions = ['All', 'Yes', 'No'];
 
   // Filtered quizzes based on search and filters
   const filteredQuizes = useMemo(() => {
-    return quizes.filter(quiz => {
-      const matchesSearch = quiz.title.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesStatus = statusFilter === 'All' || quiz.status === statusFilter;
-      const matchesAttempts = attemptsFilter === 'All' || quiz.allowMultipleAttempts === attemptsFilter;
+  return quizes.filter(quiz => {
+    const matchesSearch = (quiz.title || '').toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = statusFilter === 'All' || quiz.status === statusFilter;
+    const matchesAttempts = attemptsFilter === 'All' || quiz.allowMultipleAttempts === attemptsFilter;
 
-      return matchesSearch  && matchesStatus && matchesAttempts;
-    });
-  }, [quizes, searchTerm , statusFilter, attemptsFilter]);
+    return matchesSearch && matchesStatus && matchesAttempts;
+  });
+}, [quizes, searchTerm, statusFilter, attemptsFilter]);
+
 
   // Generate CSV content
   const generateCSV = () => {
-    const headers = ['ID', 'Title', 'Category', 'Difficulty', 'Status', 'Availability', 'Time Limit', 'Total Marks', 'Allow Multiple Attempts'];
+    const headers = ['Title', 'Status', 'Availability', 'Time Limit', 'Total Marks', 'Allow Multiple Attempts'];
     const csvContent = [
       headers.join(','),
       ...filteredQuizes.map(quiz => [
-        quiz.id,
         `"${quiz.title}"`,
         quiz.status,
         `"${quiz.availability}"`,
@@ -132,9 +113,7 @@ const Quizes = () => {
           <table>
             <thead>
               <tr>
-                <th>ID</th>
                 <th>Title</th>
-                
                 <th>Status</th>
                 <th>Availability</th>
                 <th>Time Limit</th>
@@ -145,7 +124,6 @@ const Quizes = () => {
             <tbody>
               ${filteredQuizes.map(quiz => `
                 <tr>
-                  <td>${quiz.id}</td>
                   <td>${quiz.title}</td>
                   <td>${quiz.status}</td>
                   <td>${quiz.availability}</td>
@@ -176,6 +154,32 @@ const Quizes = () => {
     setSearchTerm('');
     setStatusFilter('All');
     setAttemptsFilter('All');
+  };
+
+  // Retry function for error state
+  const retryFetch = () => {
+    setError(null);
+    setLoading(true);
+    // Re-trigger useEffect by updating a dependency or call fetchQuizzes directly
+    const fetchQuizzes = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/api/quizzes');
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        setQuizes(data);
+      } catch (err) {
+        console.error('Error fetching quizzes:', err);
+        setError(`Failed to load quizzes: ${err.message}`);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchQuizzes();
   };
 
   // CSS styles (internal)
@@ -280,6 +284,10 @@ const Quizes = () => {
       backgroundColor: '#f39c12',
       color: 'white',
     },
+    dangerButton: {
+      backgroundColor: '#e74c3c',
+      color: 'white',
+    },
     resultsInfo: {
       fontSize: '16px',
       color: '#666',
@@ -345,23 +353,29 @@ const Quizes = () => {
       backgroundColor: '#f8d7da',
       color: '#721c24',
     },
-    difficultyBadge: {
-      padding: '4px 8px',
-      borderRadius: '12px',
-      fontSize: '12px',
-      fontWeight: 'bold',
+    loadingContainer: {
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: '60px 20px',
+      flexDirection: 'column',
+      gap: '15px',
     },
-    difficultyBeginner: {
-      backgroundColor: '#d1ecf1',
-      color: '#0c5460',
+    loadingText: {
+      fontSize: '18px',
+      color: '#666',
     },
-    difficultyIntermediate: {
-      backgroundColor: '#ffeaa7',
-      color: '#6c5ce7',
+    errorContainer: {
+      backgroundColor: '#f8d7da',
+      color: '#721c24',
+      padding: '20px',
+      borderRadius: '8px',
+      textAlign: 'center',
+      marginBottom: '20px',
     },
-    difficultyAdvanced: {
-      backgroundColor: '#fab1a0',
-      color: '#e17055',
+    errorText: {
+      fontSize: '16px',
+      marginBottom: '15px',
     },
   };
 
@@ -373,6 +387,39 @@ const Quizes = () => {
       default: return styles.statusBadge;
     }
   };
+
+  // Loading state
+  if (loading) {
+    return (
+      <div style={styles.container}>
+        <h1 style={styles.header}>Quiz Management System</h1>
+        <div style={styles.listContainer}>
+          <div style={styles.loadingContainer}>
+            <Loader2 size={48} className="animate-spin" style={{ color: '#3498db' }} />
+            <div style={styles.loadingText}>Loading quizzes...</div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div style={styles.container}>
+        <h1 style={styles.header}>Quiz Management System</h1>
+        <div style={styles.errorContainer}>
+          <div style={styles.errorText}>{error}</div>
+          <button
+            onClick={retryFetch}
+            style={{ ...styles.button, ...styles.primaryButton }}
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={styles.container}>
@@ -439,6 +486,7 @@ const Quizes = () => {
             <button
               onClick={downloadCSV}
               style={{ ...styles.button, ...styles.successButton }}
+              disabled={filteredQuizes.length === 0}
             >
               <FileSpreadsheet size={16} />
               Export Excel
@@ -447,6 +495,7 @@ const Quizes = () => {
             <button
               onClick={generatePDF}
               style={{ ...styles.button, ...styles.warningButton }}
+              disabled={filteredQuizes.length === 0}
             >
               <FileText size={16} />
               Export PDF
@@ -462,7 +511,6 @@ const Quizes = () => {
           <table style={styles.table}>
             <thead>
               <tr>
-                <th style={styles.tableHeader}>ID</th>
                 <th style={styles.tableHeader}>Title</th>
                 <th style={styles.tableHeader}>Status</th>
                 <th style={styles.tableHeader}>Availability</th>
@@ -480,7 +528,6 @@ const Quizes = () => {
                     onMouseEnter={(e) => e.target.parentElement.style.backgroundColor = '#f8f9fa'}
                     onMouseLeave={(e) => e.target.parentElement.style.backgroundColor = 'transparent'}
                   >
-                    <td style={styles.tableCell}>{quiz.id}</td>
                     <td style={styles.tableCell}>
                       <strong>{quiz.title}</strong>
                     </td>
@@ -497,27 +544,33 @@ const Quizes = () => {
                     <td style={styles.tableCell}>{quiz.timeLimit}</td>
                     <td style={styles.tableCell}>{quiz.totalMarks}</td>
                     <td style={styles.tableCell}>
-                      <span style={{
-                        color: quiz.allowMultipleAttempts === 'Yes' ? '#27ae60' : '#e74c3c',
-                        fontWeight: 'bold'
-                      }}>
-                        {quiz.allowMultipleAttempts}
-                      </span>
-                    </td>
+              <span style={{
+                color: quiz.allowMultipleAttempts ? '#27ae60' : '#e74c3c',
+                fontWeight: 'bold'
+              }}>
+                {quiz.allowMultipleAttempts ? 'Yes' : 'No'}
+              </span>
+            </td>
+
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan="9" style={{...styles.tableCell, textAlign: 'center', padding: '40px'}}>
+                  <td colSpan="6" style={{...styles.tableCell, textAlign: 'center', padding: '40px'}}>
                     <div style={{color: '#666', fontSize: '18px'}}>
-                      No quizzes found matching your criteria
+                      {quizes.length === 0 
+                        ? 'No quizzes available' 
+                        : 'No quizzes found matching your criteria'
+                      }
                     </div>
-                    <button
-                      onClick={clearFilters}
-                      style={{...styles.button, ...styles.primaryButton, marginTop: '15px'}}
-                    >
-                      Clear Filters
-                    </button>
+                    {quizes.length > 0 && (
+                      <button
+                        onClick={clearFilters}
+                        style={{...styles.button, ...styles.primaryButton, marginTop: '15px'}}
+                      >
+                        Clear Filters
+                      </button>
+                    )}
                   </td>
                 </tr>
               )}

@@ -52,7 +52,7 @@ const QuizExam = () => {
     <div style={styles.quizExamContainer}>
       <h1 style={styles.title}>Exams & Quizes Details</h1>
       
-      <div style={styles.card} onClick={() => navigate('/exams')}>
+      <div style={styles.card} onClick={() => navigate('/admin/exams')}>
         <div style={styles.iconContainer}>
           <div style={styles.icon}>
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#5D5D5D" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -67,7 +67,7 @@ const QuizExam = () => {
         <h2 style={styles.cardTitle}>Exams</h2>
       </div>
       
-      <div style={styles.card } onClick={() => navigate('/quizes')}>
+      <div style={styles.card } onClick={() => navigate('/admin/quizes')}>
         <div style={styles.iconContainer}>
           <div style={styles.icon}>
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#5D5D5D" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

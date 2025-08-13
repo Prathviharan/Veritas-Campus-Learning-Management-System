@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { FaEdit, FaTrash } from 'react-icons/fa';
+import { FaEdit, FaTrash, FaPlus } from 'react-icons/fa';
 import '../../css/ManageInstructors.css';
 
 const API_URL = 'http://localhost:5000/api/instructors';
@@ -50,6 +50,11 @@ const Instructor = () => {
   useEffect(() => {
     fetchInstructors();
   }, []);
+
+  const handleAddInstructor = () => {
+    // Navigate to add instructor page
+    navigate('/admin/addinstructor');
+  };
 
   const handleEdit = (instructor) => {
     // Navigate to edit page with instructor ID
@@ -117,6 +122,14 @@ const Instructor = () => {
               <option key={dept} value={dept}>{dept}</option>
             ))}
           </select>
+
+          <button 
+            className="add-instructor-button" 
+            onClick={handleAddInstructor}
+          >
+            <FaPlus className="button-icon" />
+            Add Instructor
+          </button>
           
           <button 
             className="refresh-button" 
