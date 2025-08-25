@@ -1,19 +1,30 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
-import { useParams, Link } from 'react-router-dom';
-// import Header from '../../components/Header';
-// import Footer from '../../components/Footer';
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useDropzone } from 'react-dropzone';
+import { Alert, Spinner } from 'react-bootstrap';
 
 const UpdateLectureMaterial = () => {
   const { id } = useParams();
-  const [form, setForm] = useState({});
+  const navigate = useNavigate();
+  const [form, setForm] = useState({
+    title: '',
+    date: '',
+    visibility: 'Public',
+    file: null,
+  });
   const [course, setCourse] = useState({ name: '', code: '' });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState('');
+  const errorRef = useRef(null);
 
   useEffect(() => {
-    // Fetch lecture material data
     axios.get(`/api/instructor/lecture-material/${id}`)
       .then(res => {
-        setForm(res.data);
+        setForm({
+          ...res.data,
+          file: null // don’t preload file object
+        });
         return axios.get(`/api/courses/${res.data.courseId}`);
       })
       .then(res => setCourse(res.data))
@@ -25,36 +36,58 @@ const UpdateLectureMaterial = () => {
     setForm(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleDragOver = (e) => e.preventDefault();
-
-  const handleDrop = (e) => {
-    e.preventDefault();
-    const droppedFile = e.dataTransfer.files[0];
-    setForm({ ...form, file: droppedFile });
-  };
-
-  const removeFile = () => {
-    setForm({ ...form, file: null });
-  };
-
-  const handleUpdate = async (e) => {
-    e.preventDefault();
-    try {
-      await axios.put(`/api/instructor/lecture-material/${id}`, form);
-      alert('Updated successfully');
-    } catch (err) {
-      console.error(err);
-      alert('Update failed');
+  const onDrop = (acceptedFiles) => {
+    if (acceptedFiles.length > 0) {
+      setForm(prev => ({ ...prev, file: acceptedFiles[0] }));
     }
   };
 
-  
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    accept: {
+      'application/pdf': [],
+      'application/msword': [],
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document': [],
+      'application/vnd.ms-powerpoint': [],
+      'application/vnd.openxmlformats-officedocument.presentationml.presentation': []
+    },
+    multiple: false,
+  });
+
+  const handleUpdate = async (e) => {
+    e.preventDefault();
+    setError('');
+    setIsSubmitting(true);
+
+    const data = new FormData();
+    Object.entries(form).forEach(([key, value]) => {
+      if (value !== null && value !== undefined) {
+        data.append(key, value);
+      }
+    });
+
+    try {
+      await axios.put(`/api/instructor/lecture-material/${id}`, data, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      navigate(-1); // Go back after success
+    } catch (err) {
+      setError(err.response?.data?.message || 'Update failed');
+      setIsSubmitting(false);
+    }
+  };
 
   return (
-    <div className="d-flex flex-column min-vh-100">
-      {/* <Header /> */}
+    <>
+      {isSubmitting && (
+        <div className="position-fixed top-0 start-0 w-100 h-100 d-flex flex-column justify-content-center align-items-center bg-white bg-opacity-75" style={{ zIndex: 1050 }}>
+          <Spinner animation="border" variant="primary" role="status" style={{ width: '3rem', height: '3rem' }} />
+          <div className="mt-3 text-primary fw-medium">Updating lecture material...</div>
+        </div>
+      )}
 
-      <div className="container my-4 flex-grow-1">
+      <div className="container my-5">
         {/* Breadcrumb */}
         <nav aria-label="breadcrumb">
           <ol className="breadcrumb">
@@ -64,103 +97,101 @@ const UpdateLectureMaterial = () => {
           </ol>
         </nav>
 
-        {/* Page Title */}
-        <h3 style={{ color: '#55B649' }} className="fw-bold mb-3">
-          Update Lecture Material - {course.code} {course.name && `(${course.name})`}
-        </h3>
+        {/* Form Card */}
+        <div className="mx-auto p-4 bg-white rounded shadow" style={{ maxWidth: "900px" }}>
+          <h2 style={{ color: '#55B649' }}>
+            Update Lecture Material - {course.code} {course.name && `(${course.name})`}
+          </h2>
 
-        {/* Form Container */}
-        <form onSubmit={handleUpdate}>
-          <div className="p-4" style={{ backgroundColor: '#fff8dc', borderRadius: '10px' }}>
-            <div className="row justify-content-start">
-              <div className="col-md-8 mb-3">
-                <input
-                  type="text"
-                  name="title"
-                  className="form-control"
-                  placeholder="Title"
-                  value={form.title || ''}
-                  onChange={handleChange}
-                  required
-                />
+          {error && (
+            <Alert ref={errorRef} variant="danger" onClose={() => setError('')} dismissible>
+              {error}
+            </Alert>
+          )}
+
+          <form onSubmit={handleUpdate} encType="multipart/form-data">
+            <div className="row">
+              <div className="col-md-6 mb-3">
+                <div className="form-floating">
+                  <input
+                    id="title"
+                    name="title"
+                    type="text"
+                    className="form-control"
+                    placeholder="Lecture Title"
+                    value={form.title || ''}
+                    onChange={handleChange}
+                    disabled={isSubmitting}
+                    required
+                  />
+                  <label htmlFor="title">Title<span className="text-danger fw-bold">*</span></label>
+                </div>
               </div>
 
-              <div className="col-md-8 mb-3">
-                <input
-                  type="date"
-                  name="date"
-                  className="form-control"
-                  value={form.date || ''}
-                  onChange={handleChange}
-                />
+              <div className="col-md-6 mb-3">
+                <div className="form-floating">
+                  <input
+                    id="date"
+                    name="date"
+                    type="date"
+                    className="form-control"
+                    value={form.date || ''}
+                    onChange={handleChange}
+                    disabled={isSubmitting}
+                  />
+                  <label htmlFor="date">Date</label>
+                </div>
               </div>
+            </div>
 
-              {/* Drag-and-drop Upload with Remove Option */}
+            <div className="mb-4">
+              <div className="form-floating">
+                <select
+                  id="visibility"
+                  name="visibility"
+                  className="form-select"
+                  value={form.visibility}
+                  onChange={handleChange}
+                  disabled={isSubmitting}
+                >
+                  <option value="Public">Public</option>
+                  <option value="Private">Private</option>
+                </select>
+                <label htmlFor="visibility">Visibility</label>
+              </div>
+            </div>
+
+            <div className="mb-4">
+              <label className="form-label">Upload File</label>
               <div
-                className="col-md-0 mb-3 p-4 text-center border"
-                onDragOver={handleDragOver}
-                onDrop={handleDrop}
-                style={{ borderStyle: 'dashed', borderColor: '#ccc', backgroundColor: '#f9f9f9', borderRadius: '8px' }}
+                {...getRootProps()}
+                className={`border border-2 rounded p-3 text-center bg-light ${isSubmitting ? 'opacity-50' : 'border-secondary hover:border-primary bg-white'}`}
+                style={{ cursor: isSubmitting ? 'not-allowed' : 'pointer' }}
               >
-                <p className="mb-2">Drag & drop your file here</p>
-                <p className="text-muted">or select below</p>
-                <input
-                  type="file"
-                  name="file"
-                  accept=".pdf,.doc,.docx,.ppt,.pptx"
-                  className="form-control"
-                  onChange={handleChange}
-                  required
-                />
-                {form.file && (
-                  <div className="mt-2 d-flex justify-content-between align-items-center px-2 bg-light border rounded">
-                    <span className="text-success">{form.file.name}</span>
-                    <i className="fas fa-trash-alt text-danger ms-3" style={{ cursor: 'pointer' }} onClick={removeFile}/>
-
-                  </div>
+                <input {...getInputProps()} disabled={isSubmitting} />
+                {isDragActive ? (
+                  <p className="mb-0">Drop the file here...</p>
+                ) : form.file ? (
+                  <p className="mb-0">{form.file.name}</p>
+                ) : (
+                  <p className="mb-0">Drag & drop a file here, or click to select</p>
                 )}
               </div>
-
-              <div className="col-md-8 mb-3">
-                <label className="form-label me-3">Visibility:</label>
-                <br />
-                <div className="form-check form-check-inline">
-                  <input
-                    className="form-check-input"
-                    type="radio"
-                    name="visibility"
-                    value="Public"
-                    checked={form.visibility === 'Public'}
-                    onChange={handleChange}
-                    required
-                  />
-                  <label className="form-check-label">Public</label>
-                </div>
-                <div className="form-check form-check-inline">
-                  <input
-                    className="form-check-input"
-                    type="radio"
-                    name="visibility"
-                    value="Private"
-                    checked={form.visibility === 'Private'}
-                    onChange={handleChange}
-                    required
-                  />
-                  <label className="form-check-label">Private</label>
-                </div>
-              </div>
             </div>
 
-            {/* Submit Button aligned to bottom-right */}
-            <div className="d-flex justify-content-end mt-3">
-              <button type="submit" className="btn btn-success px-4">Update</button>
+            <div className="d-flex justify-content-end mt-4">
+              <button
+                type="submit"
+                className="btn btn-success px-4 py-2 fw-semibold"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? 'Updating...' : 'Update'}
+              </button>
             </div>
-          </div>
-        </form>
+          </form>
+        </div>
       </div>
-
-      {/* <Footer /> */}
-    </div>
+    </>
   );
 };
 

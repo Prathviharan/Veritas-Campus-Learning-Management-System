@@ -1,4 +1,3 @@
-// src/pages/instructor/AddAssignment.js
 import React, { useState } from 'react';
 import '../../css/AddAssignment.css';
 import axios from 'axios';
@@ -20,9 +19,9 @@ const AddAssignment = () => {
   const [showModal, setShowModal] = useState(false);
 
   const handleChange = (e) => {
-    const { name, value, type } = e.target;
+    const { name, value, type, files } = e.target;
     if (type === 'file') {
-      setFormData({ ...formData, file: e.target.files[0] });
+      setFormData({ ...formData, file: files[0] });
     } else {
       setFormData({ ...formData, [name]: value });
     }
@@ -31,65 +30,88 @@ const AddAssignment = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (!formData.file) {
+      alert("Please select a file.");
+      return;
+    }
+
     const data = new FormData();
     data.append('title', formData.title);
     data.append('description', formData.description);
     data.append('file', formData.file);
     data.append('visibility', formData.visibility);
-    
-    // Convert local time to UTC
-    const localDate = new Date(formData.deadline);
-    const utcDate = new Date(Date.UTC(
-      localDate.getFullYear(),
-      localDate.getMonth(),
-      localDate.getDate(),
-      localDate.getHours(),
-      localDate.getMinutes()
-    ));
-    
-    data.append('deadline', utcDate.toISOString());
 
     try {
-      await axios.post('http://localhost:5000/api/instructor/assignments', data);
+      const localDate = new Date(formData.deadline);
+      if (isNaN(localDate.getTime())) throw new Error('Invalid date');
+
+      const utcDate = new Date(Date.UTC(
+        localDate.getFullYear(),
+        localDate.getMonth(),
+        localDate.getDate(),
+        localDate.getHours(),
+        localDate.getMinutes()
+      ));
+
+      data.append('deadline', utcDate.toISOString());
+
+      await axios.post('http://localhost:5000/api/instructor/assignments', data, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
       setShowModal(true);
     } catch (error) {
-      console.error(error);
-      alert('Upload failed');
+      console.error("Assignment upload failed:", error);
+      alert('Upload failed: ' + (error.response?.data?.error || error.message));
     }
   };
 
   const handleViewAll = () => {
     setShowModal(false);
-    setTimeout(() => {
-      navigate('/instructor/added-assignment');
-    }, 100);
+    navigate('/instructor/added-assignment');
   };
 
   return (
     <div className="add-assignment">
       <h2>Add New Assignments</h2>
-      <form onSubmit={handleSubmit} className="assignment-form">
+      <form onSubmit={handleSubmit} className="assignment-form" encType="multipart/form-data">
         <input type="text" name="title" placeholder="Title" onChange={handleChange} required />
         <textarea name="description" placeholder="Description" onChange={handleChange} required />
         <input type="file" name="file" onChange={handleChange} required />
+        
         <div className="visibility">
           <label>
-            <input type="radio" name="visibility" value="Public" checked={formData.visibility === 'Public'} onChange={handleChange} />
-            Public
+            <input
+              type="radio"
+              name="visibility"
+              value="Public"
+              checked={formData.visibility === 'Public'}
+              onChange={handleChange}
+            /> Public
           </label>
           <label>
-            <input type="radio" name="visibility" value="Private" onChange={handleChange} />
-            Private
+            <input
+              type="radio"
+              name="visibility"
+              value="Private"
+              checked={formData.visibility === 'Private'}
+              onChange={handleChange}
+            /> Private
           </label>
         </div>
-        <input 
-          type="datetime-local" 
-          name="deadline" 
-          onChange={handleChange} 
+
+        <input
+          type="datetime-local"
+          name="deadline"
+          onChange={handleChange}
           min={new Date().toISOString().slice(0, 16)}
-          required 
+          required
         />
-        <Button text="Save & Publish" onClick={handleSubmit} />
+
+        {/* Remove onClick to avoid double submit */}
+        <Button text="Save & Publish" />
       </form>
 
       {showModal && (
